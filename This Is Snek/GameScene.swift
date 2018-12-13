@@ -11,15 +11,23 @@ import GameplayKit
 
 class GameScene: SKScene {
     
-    //MARK:- Properties
+    //MARK:- Title screen roperties
     var gameLogo: SKLabelNode!
     var bestScore: SKLabelNode!
     var playButton: SKShapeNode!
     var game: GameManager!
     
+    //MARK:- Game round properties
+    var currentScore: SKLabelNode!
+    var playerPositions: [(Int, Int)] = []
+    var gameBG: SKShapeNode!
+    var gameArray: [(node: SKShapeNode, x: Int, y: Int)] = []
+    
     override func didMove(to view: SKView) {
        initializeMenu()
         game = GameManager()
+        
+        initializeGameView()
     }
     
     //MARK:- Menu creation method
@@ -60,10 +68,6 @@ class GameScene: SKScene {
         playButton.path = path
         
         self.addChild(playButton)
-            
-        
-        
-        
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -78,6 +82,8 @@ class GameScene: SKScene {
         }
     }
     
+    //MARK:- Game round logic
+    
     private func startGame() {
         //begin the round by removing the menu elements from the title screen
         gameLogo.run(SKAction.move(by: CGVector(dx: -50, dy: 600), duration: 0.5)) {
@@ -90,6 +96,36 @@ class GameScene: SKScene {
         
         let bottomCorner = CGPoint(x: 0, y: (size.height / -2) + 30)
         bestScore.run(SKAction.move(to: bottomCorner, duration: 0.4))
+    }
+    
+    private func initializeGameView() {
+        currentScore = SKLabelNode(fontNamed: "ArialRoundedMTBold")
+        currentScore.zPosition = 1
+        currentScore.position = CGPoint(x: 0, y: (frame.height / -2 ) + 60)
+        currentScore.fontSize = 40
+        currentScore.isHidden = true //hidden until we leave the menu
+        currentScore.fontColor = SKColor.white
+        
+        addChild(currentScore)
+        
+        //setting up the stage background
+        let width = frame.size.width - 200
+        let height = frame.size.height - 300
+        let rect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
+        gameBG = SKShapeNode(rect: rect, cornerRadius: 0.02)
+        gameBG.fillColor = .darkGray
+        gameBG.zPosition = 2
+        gameBG.isHidden = true //hidden until we leave the menu
+        
+        addChild(gameBG)
+        
+        createGameBoard(width: width, height: height)
+        
+    }
+    
+    private func createGameBoard(width: CGFloat, height: CGFloat) {
+        print("board is being created!")
+        //initializes a bunch of square cells and adds them to the game board
     }
     
     override func update(_ currentTime: TimeInterval) {
