@@ -15,7 +15,7 @@ class GameManager {
     var nextTime: Double? //time of the next event
     var timeExtension: Double = 0.15 //how long between events
     
-    var playerDirection: Int = 3 //1 is left, 2 is up, 3 is right, 4 is down
+    var playerDirection: Int = 4 //1 is left, 2 is up, 3 is right, 4 is down
     var currentScore: Int = 0
     
     init(scene: GameScene) {
@@ -60,6 +60,11 @@ class GameManager {
                 currentScore += 1
                 scene.currentScore.text = "Score: \(currentScore)"
                 generateNewPoint()
+                
+                //extend the snake
+                scene.playerPositions.append(scene.playerPositions.last!)
+                scene.playerPositions.append(scene.playerPositions.last!)
+                scene.playerPositions.append(scene.playerPositions.last!)
             }
         }
     }
@@ -77,6 +82,54 @@ class GameManager {
         scene.scorePos = CGPoint(x: randomX, y: randomY)
     }
     
+    //MARK:- Game over logic
+    private func checkForDeath() {
+        if scene.playerPositions.count > 0 {
+            var arrayOfPositions = scene.playerPositions
+            let headOfSnake = arrayOfPositions[0] //cut the body off, leave head
+            arrayOfPositions.remove(at: 0) //cut the head off, leave body
+            
+            //if head collides with body
+            if contains(a: arrayOfPositions, v: headOfSnake){
+                playerDirection = 0
+            }
+        }
+    }
+    
+    private func finishAnimation() {
+        if playerDirection == 0 && scene.playerPositions.count > 0 {
+            var hasFinished = true
+            
+            let headOfSnake = scene.playerPositions[0]
+            for position in scene.playerPositions { //check whether or not the snake has crossed itself as indicated by it shrinking down to one square
+                if headOfSnake != position {
+                    hasFinished = false
+                }
+            }
+            
+            if hasFinished {
+                print("End game")
+                playerDirection = 4
+                scene.scorePos = nil
+                scene.playerPositions.removeAll()
+                renderChange()
+                
+                //return to menu
+                scene.currentScore.run(SKAction.scale(to: 0, duration: 0.4)) {
+                    self.scene.gameBG.isHidden = true
+                    self.scene.gameLogo.isHidden = false
+                    self.scene.gameLogo.run(SKAction.move(to: CGPoint(x: 0, y: (self.scene.frame.size.height / 2) - 200), duration: 0.5)) {
+                        self.scene.playButton.isHidden = false
+                        self.scene.playButton.run(SKAction.scale(to: 1, duration: 0.3))
+                        self.scene.bestScore.run(SKAction.move(to: CGPoint(x: 0, y: self.scene.gameLogo.position.y - 50), duration: 0.3))
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    //MARK:- Game state checking logic
     func contains(a: [(Int, Int)], v: (Int, Int)) -> Bool {
         //check whether the tuple exists within an array of tuples
         let (c1, c2) = v
@@ -96,6 +149,8 @@ class GameManager {
                 //print(time)
                 updatePlayerPosition()
                 checkForScore()
+                checkForDeath()
+                finishAnimation()
             }
         }
     }
@@ -103,8 +158,11 @@ class GameManager {
     func swipe(ID: Int) {
         //if you're moving down, you can't immediately move up, etc.
         if !(ID == 2 && playerDirection == 4) && !(ID == 4 && playerDirection == 2) && !(ID == 1 && playerDirection == 3) && !(ID == 3 && playerDirection == 1) {
-            playerDirection = ID
+                if playerDirection != 0 { //if game not over
+                    playerDirection = ID
+            }
         }
+        //print(playerDirection)
     }
     
     private func updatePlayerPosition() {
@@ -132,6 +190,11 @@ class GameManager {
             xChange = 0
             yChange = 1
             break
+        case 0:
+            //dead - stop moving
+            xChange = 0
+            yChange = 0
+            break
         default:
             break
         }
@@ -145,7 +208,7 @@ class GameManager {
             //move front of snek in appropriate direction and then move tail blocks forward to next position
             scene.playerPositions[0] =  (scene.playerPositions[0].0 + yChange, scene.playerPositions[0].1 + xChange)
             
-            //MARK:- Make the snek wrap around the screen when it reaches the bounds
+            //Make the snek wrap around the screen when it reaches the bounds
             let x = scene.playerPositions[0].1
             let y = scene.playerPositions[0].0
             
@@ -160,6 +223,7 @@ class GameManager {
             }
         }
         
+        //print(scene.playerPositions)
         renderChange()
     }
     
