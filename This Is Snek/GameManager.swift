@@ -16,6 +16,7 @@ class GameManager {
     var timeExtension: Double = 0.15 //how long between events
     
     var playerDirection: Int = 3 //1 is left, 2 is up, 3 is right, 4 is down
+    var currentScore: Int = 0
     
     init(scene: GameScene) {
         self.scene = scene
@@ -27,6 +28,7 @@ class GameManager {
         scene.playerPositions.append((10, 11))
         scene.playerPositions.append((10, 12))
         renderChange()
+        generateNewPoint()
     }
     
     func renderChange() {
@@ -36,8 +38,43 @@ class GameManager {
                 node.fillColor = SKColor.cyan //these represent the snek's position on the board
             } else {
                 node.fillColor = SKColor.clear //these blocks are nothing, clear means they'll reflect whatever color we set for the board, currently darkGray
+                
+                if scene.scorePos != nil {
+                    //if the node position == randomly placed score...
+                    //positions are flipped in the nodes array, so we're comparing x to y
+                    if Int((scene.scorePos?.x)!) == y && Int((scene.scorePos?.y)!) == x {
+                        node.fillColor = .red
+                    }
+                }
             }
         }
+    }
+    
+    //MARK:- Scoring logic
+    private func checkForScore() {
+        if scene.scorePos != nil {
+            let x = scene.playerPositions[0].0
+            let y = scene.playerPositions[0].1
+            
+            if Int((scene.scorePos?.x)!) == y && Int((scene.scorePos?.y)!) == x {
+                currentScore += 1
+                scene.currentScore.text = "Score: \(currentScore)"
+                generateNewPoint()
+            }
+        }
+    }
+    
+    private func generateNewPoint() {
+        var randomX = CGFloat(arc4random_uniform(UInt32(19))) //max x value is 20
+        var randomY = CGFloat(arc4random_uniform(UInt32(39))) //max y value is 40
+        
+        //if the random point is inside of the snake, get a new point
+        while contains(a: scene.playerPositions, v: (Int(randomX), Int(randomY))) {
+            randomX = CGFloat(arc4random_uniform(UInt32(19)))
+            randomY = CGFloat(arc4random_uniform(UInt32(39)))
+        }
+        
+        scene.scorePos = CGPoint(x: randomX, y: randomY)
     }
     
     func contains(a: [(Int, Int)], v: (Int, Int)) -> Bool {
@@ -58,6 +95,7 @@ class GameManager {
                 nextTime = time + timeExtension
                 //print(time)
                 updatePlayerPosition()
+                checkForScore()
             }
         }
     }
