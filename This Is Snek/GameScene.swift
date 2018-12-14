@@ -28,7 +28,44 @@ class GameScene: SKScene {
         game = GameManager(scene: self) //GameManager contains a reference to GameScene, once it is initialized
         
         initializeGameView()
+        
+        //MARK:- Gesture recognizers
+        let swipeRight: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeRight))
+        swipeRight.direction = .right
+        view.addGestureRecognizer(swipeRight)
+        
+        let swipeLeft: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeLeft))
+        swipeLeft.direction = .left
+        view.addGestureRecognizer(swipeLeft)
+        
+        let swipeUp: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeUp))
+        swipeUp.direction = .up
+        view.addGestureRecognizer(swipeUp)
+        
+        let swipeDown: UISwipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeDown))
+        swipeDown.direction = .down
+        view.addGestureRecognizer(swipeDown)
     }
+    
+    //MARK:- Swipe handler methods
+    @objc func handleSwipeRight() {
+        game.swipe(ID: 3) //in short, we're passing this id to our Game Manager's swipe function which is then using that value in a playerDirection switch conditional to determine how to alter the x and y directions
+    }
+    
+    @objc func handleSwipeUp() {
+        game.swipe(ID: 2)
+    }
+    
+    @objc func handleSwipeLeft() {
+        game.swipe(ID: 1)
+    }
+    
+    @objc func handleSwipeDown() {
+        game.swipe(ID: 4)
+    }
+    
+    
+    
     
     //MARK:- Menu creation method
     private func initializeMenu() {

@@ -13,9 +13,9 @@ class GameManager {
     
     var scene: GameScene! //we'll use this to track the location of the snek
     var nextTime: Double? //time of the next event
-    var timeExtension: Double = 1 //how long between events
+    var timeExtension: Double = 0.15 //how long between events
     
-    var playerDirection: Int = 1
+    var playerDirection: Int = 3 //1 is left, 2 is up, 3 is right, 4 is down
     
     init(scene: GameScene) {
         self.scene = scene
@@ -62,6 +62,13 @@ class GameManager {
         }
     }
     
+    func swipe(ID: Int) {
+        //if you're moving down, you can't immediately move up, etc.
+        if !(ID == 2 && playerDirection == 4) && !(ID == 4 && playerDirection == 2) && !(ID == 1 && playerDirection == 3) && !(ID == 3 && playerDirection == 1) {
+            playerDirection = ID
+        }
+    }
+    
     private func updatePlayerPosition() {
         var xChange = -1
         var yChange = 0
@@ -97,7 +104,22 @@ class GameManager {
                 scene.playerPositions[start] = scene.playerPositions[start - 1]
                 start -= 1
             }
+            //move front of snek in appropriate direction and then move tail blocks forward to next position
             scene.playerPositions[0] =  (scene.playerPositions[0].0 + yChange, scene.playerPositions[0].1 + xChange)
+            
+            //MARK:- Make the snek wrap around the screen when it reaches the bounds
+            let x = scene.playerPositions[0].1
+            let y = scene.playerPositions[0].0
+            
+            if y > 40 {
+                scene.playerPositions[0].0 = 0
+            } else if y < 0 {
+                scene.playerPositions[0].0 = 40
+            } else if x > 20 {
+                scene.playerPositions[0].1 = 0
+            } else if x < 0 {
+                scene.playerPositions[0].1 = 20
+            }
         }
         
         renderChange()
