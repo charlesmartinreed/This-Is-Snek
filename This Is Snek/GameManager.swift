@@ -109,6 +109,7 @@ class GameManager {
             
             if hasFinished {
                 print("End game")
+                updateScore()
                 playerDirection = 4
                 scene.scorePos = nil
                 scene.playerPositions.removeAll()
@@ -127,6 +128,19 @@ class GameManager {
                 }
             }
         }
+    }
+    
+    private func updateScore() {
+        //write the score to NSDefaults for saving
+        
+        if currentScore > UserDefaults.standard.integer(forKey: "bestScore") {
+            UserDefaults.standard.set(currentScore, forKey: "bestScore")
+        }
+        
+        //reset the current score value, current score label, update best score label
+        currentScore = 0
+        scene.currentScore.text = "Score: 0"
+        scene.bestScore.text = "Best score: \(UserDefaults.standard.integer(forKey: "bestScore"))"
     }
     
     //MARK:- Game state checking logic

@@ -86,7 +86,7 @@ class GameScene: SKScene {
         bestScore.position = CGPoint(x: 0, y: gameLogo.position.y - 50)
         bestScore.fontSize = 40
         bestScore.fontColor = .white
-        bestScore.text = "Best Score: 0"
+        bestScore.text = "Best Score: \(UserDefaults.standard.integer(forKey: "bestScore"))"
         self.addChild(bestScore)
         
         //draw and display the play button
