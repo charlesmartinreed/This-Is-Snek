@@ -83,34 +83,20 @@ class GameScene: SKScene {
     }
     
     //MARK:- Game round logic
-    
-    private func startGame() {
-        //begin the round by removing the menu elements from the title screen
-        gameLogo.run(SKAction.move(by: CGVector(dx: -50, dy: 600), duration: 0.5)) {
-            self.gameLogo.isHidden = true
-        }
-        
-        playButton.run(SKAction.scale(to: 0, duration: 0.3)) {
-            self.playButton.isHidden = true
-        }
-        
-        let bottomCorner = CGPoint(x: 0, y: (size.height / -2) + 30)
-        bestScore.run(SKAction.move(to: bottomCorner, duration: 0.4))
-    }
-    
     private func initializeGameView() {
-        currentScore = SKLabelNode(fontNamed: "ArialRoundedMTBold")
+        currentScore = SKLabelNode(fontNamed: "Futura-Medium")
         currentScore.zPosition = 1
-        currentScore.position = CGPoint(x: 0, y: (frame.height / -2 ) + 60)
+        currentScore.position = CGPoint(x: 0, y: (size.height / -2 ) + 60)
         currentScore.fontSize = 40
+        currentScore.text = "Score: 0"
         currentScore.isHidden = true //hidden until we leave the menu
         currentScore.fontColor = SKColor.white
         
         addChild(currentScore)
         
         //setting up the stage background
-        let width = frame.size.width - 200
-        let height = frame.size.height - 300
+        let width = 550
+        let height = 1100
         let rect = CGRect(x: -width / 2, y: -height / 2, width: width, height: height)
         gameBG = SKShapeNode(rect: rect, cornerRadius: 0.02)
         gameBG.fillColor = .darkGray
@@ -123,9 +109,53 @@ class GameScene: SKScene {
         
     }
     
-    private func createGameBoard(width: CGFloat, height: CGFloat) {
+    private func createGameBoard(width: Int, height: Int) {
         print("board is being created!")
         //initializes a bunch of square cells and adds them to the game board
+        let cellWidth: CGFloat = 27.5
+        let numRows = 40
+        let numCols = 20
+        var x = CGFloat(width / -2) + (cellWidth / 2)
+        var y = CGFloat(height / 2) - (cellWidth / 2)
+        
+        //loop through rows and cols, place a cell there
+        for i in 0..<numRows {
+            for j in 0..<numCols {
+                let cellNode = SKShapeNode(rectOf: CGSize(width: cellWidth, height: cellWidth))
+                cellNode.strokeColor = .black
+                cellNode.zPosition = 2
+                cellNode.position = CGPoint(x: x, y: y)
+                gameArray.append((node: cellNode, x: i, y: j)) //this is used to easily find a given cellNode in our game array by row and column
+                gameBG.addChild(cellNode)
+                
+                x += cellWidth
+            }
+            //reset x, iterate y
+            x = CGFloat(width / -2) + (cellWidth / 2)
+            y -= cellWidth
+        }
+    }
+    
+    private func startGame() {
+        //begin the round by removing the menu elements from the title screen
+        gameLogo.run(SKAction.move(by: CGVector(dx: -50, dy: 600), duration: 0.5)) {
+            self.gameLogo.isHidden = true
+        }
+        
+        playButton.run(SKAction.scale(to: 0, duration: 0.3)) {
+            self.playButton.isHidden = true
+        }
+        
+        //start building the game stage UI
+        let bottomCorner = CGPoint(x: 0, y: (size.height / -2) + 20)
+        bestScore.run(SKAction.move(to: bottomCorner, duration: 0.4)) {
+            self.gameBG.setScale(0)
+            self.currentScore.setScale(0)
+            self.gameBG.isHidden = false
+            self.currentScore.isHidden = false
+            self.gameBG.run(SKAction.scale(to: 1, duration: 0.4))
+            self.currentScore.run(SKAction.scale(to: 1, duration: 0.4))
+        }
     }
     
     override func update(_ currentTime: TimeInterval) {
